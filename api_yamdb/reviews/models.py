@@ -1,5 +1,7 @@
+from django.conf import settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.db.models.constraints import UniqueConstraint
 
 
 class User(AbstractUser):
@@ -13,13 +15,26 @@ class User(AbstractUser):
     role = models.CharField(
         'Пользовательская роль',
         max_length=20,
-        choices=[
-            ('user', 'User'),
-            ('moderator', 'Moderator'),
-            ('admin', 'Admin'),
-        ],
-        default='user'
+        choices=settings.ROLE_CHOICES,
+        default=settings.USER,
     )
+    confirmation_code = models.TextField('Код подтверждения')
+
+    def is_admin(self):
+        return (self.role == settings.ADMIN or self.is_superuser
+                or self.is_staff)
+
+    def is_moderator(self):
+        return self.role == settings.MODERATOR
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        constraints = [UniqueConstraint(
+            fields=['username', 'email'],
+            name='unique_registry')]
+        ordering = ['username']
 
 
 class Category(models.Model):
