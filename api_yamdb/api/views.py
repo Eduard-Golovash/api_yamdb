@@ -9,7 +9,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework.response import Response
 
-from reviews.models import Comment, Review, Title
+from reviews.models import Comment, Review, Title, User
 from .permissions import (IsAdminOrModeratorOrOwnerOrReadOnly, AdminOrReadOnly,
                           IsAdmin)
 from .serializer import ReviewSerializer, CommentSerializer
@@ -60,7 +60,6 @@ class CommentViewSet(viewsets.ModelViewSet):
 
 
 codegen = PasswordResetTokenGenerator()
-User = get_user_model()
 
 
 class RegisterUserAPIView(generics.CreateAPIView):
