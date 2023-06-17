@@ -6,8 +6,6 @@ app_name = 'api'
 
 router_v1 = routers.DefaultRouter()
 
-# роутеры для ViewSets
-
 auth_urls_v1 = [
     path('auth/signup/', RegisterUserAPIView.as_view(), name='signup'),
     path('auth/token/', GetTokenAPIView.as_view(), name='get_token'),
