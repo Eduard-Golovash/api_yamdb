@@ -1,16 +1,20 @@
+from django_filters.rest_framework import DjangoFilterBackend
 from django.shortcuts import get_object_or_404
-from django.shortcuts import render
-from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.exceptions import ParseError
-from rest_framework import viewsets
-from rest_framework import permissions
-from rest_framework.authtoken.models import Token
-from rest_framework_simplejwt.tokens import AccessToken
+from rest_framework import filters, viewsets, status
+from rest_framework.response import Response
 
-from reviews.models import Comment, Review, Title
+from reviews.models import *
 from .permissions import (IsAdminOrModeratorOrOwnerOrReadOnly, AdminOrReadOnly,
                           IsAdmin)
-from .serializer import ReviewSerializer, CommentSerializer
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    ReviewSerializer,
+    TitleSerializer,
+    UsersSerializer,
+)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -53,3 +57,54 @@ class CommentViewSet(viewsets.ModelViewSet):
             pk=self.kwargs.get('review_id')
         )
         serializer.save(author=self.request.user, review=review)
+
+
+class CategoryViewSet(viewsets.ModelViewSet):
+    queryset = Category.objects.all()
+    serializer_class = CategorySerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = [AdminOrReadOnly]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class GenreViewSet(viewsets.ModelViewSet):
+    queryset = Genre.objects.all()
+    serializer_class = GenreSerializer
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+    permission_classes = [AdminOrReadOnly]
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
+class TitleViewSet(viewsets.ModelViewSet):
+    queryset = Title.objects.all()
+    serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend,)
+    filterset_fields = ('category', 'genre', 'name', 'year')
+    permission_classes = [AdminOrReadOnly]
+
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(status=status.HTTP_201_CREATED, headers=headers)
+
+    def partial_update(self, request, *args, **kwargs):
+        kwargs['partial'] = True
+        return super().partial_update(request, *args, **kwargs)
+
+    def destroy(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
+        return Response(status=status.HTTP_204_NO_CONTENT)
+    
