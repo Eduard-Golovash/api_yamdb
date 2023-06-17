@@ -1,7 +1,6 @@
 from django.shortcuts import get_object_or_404
 from django.shortcuts import render
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-from django.contrib.auth import get_user_model
 from rest_framework.exceptions import ParseError
 from rest_framework import viewsets, generics, status
 from rest_framework import permissions
