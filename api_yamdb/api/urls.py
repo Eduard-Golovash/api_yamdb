@@ -14,6 +14,7 @@ app_name = 'api'
 
 router_v1 = routers.DefaultRouter()
 
+
 router_v1.register(r'categories', CategoryViewSet, basename='category')
 router_v1.register(
     r'titles/(?P<title_id>\d+)/reviews/(?P<review_id>\d+)/comments',
@@ -38,6 +39,7 @@ router_v1.register(
     r'titles/(?P<title_id>\d+)',
     TitleViewSet,
     basename='title')
+
 
 auth_urls_v1 = [
     path('auth/signup/', RegisterUserAPIView.as_view(), name='signup'),
