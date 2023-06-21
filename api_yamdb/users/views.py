@@ -7,12 +7,10 @@ from rest_framework import generics, status
 from rest_framework.response import Response
 
 from reviews.models import *
-from api.send_util import send_confirm_code
+from api.send_util import send_confirmation_code
 from .serializers import (
     RegisterUserSerializer,
-    TokenSerializer,
-)
-
+    TokenSerializer,)
 
 codegen = PasswordResetTokenGenerator()
 
@@ -33,12 +31,12 @@ class RegisterUserAPIView(generics.CreateAPIView):
             serializer.is_valid(raise_exception=True)
             User.objects.create(**serializer.validated_data,
                                 confirmation_code=confirmation_code)
-        send_confirm_code(confirmation_code,
+        send_confirmation_code(confirmation_code,
                                email=serializer.validated_data['email'])
         return Response(data, status=status.HTTP_200_OK)
 
 
-class GetTokenAPIView(generics.APIView):
+class GetTokenAPIView(generics.CreateAPIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
@@ -48,8 +46,8 @@ class GetTokenAPIView(generics.APIView):
         username = serializer.validated_data.get('username')
         user = get_object_or_404(User, username=username)
 
-        if codegen.check_token(user, confirmation_code):
-            token = AccessToken.for_user(user)
+        if confirmation_code == user.confirmation_code:
+            token = str(AccessToken.for_user(user))
             return Response({'token': f'{token}'}, status=status.HTTP_200_OK)
         
         return Response(

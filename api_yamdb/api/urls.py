@@ -1,3 +1,4 @@
+from django.urls import include, path
 from rest_framework import routers
 from .views import (
     CategoryViewSet,
@@ -5,6 +6,7 @@ from .views import (
     GenreViewSet,
     ReviewViewSet,
     TitleViewSet,
+    UserViewSet,
 )
 
 app_name = 'api'
@@ -36,3 +38,8 @@ router_v1.register(
     r'titles/(?P<title_id>\d+)',
     TitleViewSet,
     basename='title')
+router_v1.register(r'users', UserViewSet, basename='users')
+
+urlpatterns = [
+    path('', include(router_v1.urls)),
+]

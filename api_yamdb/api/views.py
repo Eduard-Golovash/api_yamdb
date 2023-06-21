@@ -4,9 +4,16 @@ from django.shortcuts import get_object_or_404
 from rest_framework.exceptions import ParseError
 from rest_framework import filters, viewsets, status
 from rest_framework.response import Response
+from rest_framework.decorators import action
+from rest_framework.exceptions import ValidationError
+from rest_framework.permissions import (IsAuthenticated,
+                                        IsAuthenticatedOrReadOnly)
 
-from reviews.models import *
-from .permissions import (IsAdminOrModeratorOrOwnerOrReadOnly, AdminOrReadOnly,)
+from reviews.models import Category, Comment, Genre, Review, Title, User
+from .permissions import (IsAdminOrModeratorOrOwnerOrReadOnly,
+                          AdminOrReadOnly,
+                          IsAdmin,
+                          IsAuthor)
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -15,6 +22,47 @@ from .serializers import (
     TitleSerializer,
     ReadTitleSerializer
 )
+from users.serializers import UsersSerializer, UsersMeSerializer
+
+
+class UserViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UsersSerializer
+    http_method_names = ["get", "post", "patch", "delete"]
+    permission_classes = (AdminOrReadOnly,)
+    filter_backends = (DjangoFilterBackend, filters.SearchFilter)
+    search_fields = ("=username",)
+    lookup_field = "username"
+
+    def perform_create(self, serializer):
+        if self.request.user.role == "admin":
+            if not self.request.POST.get("email"):
+                raise ValidationError("entry is already exist.")
+        serializer.save()
+
+    def get_permissions(self):
+        if self.action in ["list", "retrieve", "create"]:
+            return (IsAdmin(),)
+        return super().get_permissions()
+
+    @action(
+        methods=["GET", "PATCH"],
+        detail=False,
+        url_path="me",
+        permission_classes=[IsAuthenticated],
+    )
+    def get_patch_me(self, request):
+        user = get_object_or_404(User, username=self.request.user)
+        if request.method == "GET":
+            serializer = UsersMeSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        if request.method == "PATCH":
+            serializer = UsersMeSerializer(
+                user, data=request.data, partial=True
+            )
+            serializer.is_valid(raise_exception=True)
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -40,7 +88,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
     serializer_class = CommentSerializer
-    permission_classes = (IsAdminOrModeratorOrOwnerOrReadOnly,)
+    permission_classes = (IsAdminOrModeratorOrOwnerOrReadOnly)
 
     def get_queryset(self):
         review = get_object_or_404(
