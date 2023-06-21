@@ -1,15 +1,16 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
+from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework import permissions
 from rest_framework.exceptions import ParseError
-from rest_framework import generics, filters, viewsets, status
+from rest_framework import generics, filters, views, viewsets, status
 from rest_framework.response import Response
 
 from reviews.models import *
-from .send_util import send_confirm_code
+from .send_util import send_confirmation_code
 from .permissions import (IsAdminOrModeratorOrOwnerOrReadOnly, AdminOrReadOnly,
                           IsAdmin)
 from .serializers import (
@@ -141,12 +142,12 @@ class RegisterUserAPIView(generics.CreateAPIView):
             serializer.is_valid(raise_exception=True)
             User.objects.create(**serializer.validated_data,
                                 confirmation_code=confirmation_code)
-        send_confirm_code(confirmation_code,
+        send_confirmation_code(confirmation_code,
                                email=serializer.validated_data['email'])
         return Response(data, status=status.HTTP_200_OK)
 
 
-class GetTokenAPIView(generics.APIView):
+class GetTokenAPIView(views.APIView):
     permission_classes = (permissions.AllowAny,)
 
     def post(self, request):
