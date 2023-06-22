@@ -6,7 +6,7 @@ from rest_framework import permissions
 from rest_framework import generics, status
 from rest_framework.response import Response
 
-from reviews.models import *
+from reviews.models import User
 from api.send_util import send_confirmation_code
 from .serializers import (
     RegisterUserSerializer,
@@ -18,7 +18,7 @@ codegen = PasswordResetTokenGenerator()
 class RegisterUserAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (permissions.AllowAny,)
-    serializer_class = RegisterUserSerializer
+    serializer_class = RegisterUserSerializer  
 
     def post(self, request, *args, **kwargs):
         data = request.data
