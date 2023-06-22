@@ -26,14 +26,15 @@ class RegisterUserAPIView(generics.CreateAPIView):
         confirmation_code = Token.generate_key()
         user = User.objects.filter(**data).first()
         if user:
-            confirmation_code = user.confirmation_code
+            user.confirmation_code = user.confirmation_code
+            user.save()
         else:
             serializer.is_valid(raise_exception=True)
             User.objects.create(**serializer.validated_data,
                                 confirmation_code=confirmation_code)
         send_confirmation_code(confirmation_code,
                                email=serializer.validated_data['email'])
-        return Response(data, status=status.HTTP_200_OK)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class GetTokenAPIView(generics.CreateAPIView):
