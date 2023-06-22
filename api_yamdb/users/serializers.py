@@ -3,7 +3,7 @@ import re
 from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
-from reviews.models import *
+from reviews.models import User
 
 
 class RegisterUserSerializer(serializers.Serializer):

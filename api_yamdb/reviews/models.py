@@ -5,8 +5,17 @@ from users.models import User
 
 class Category(models.Model):
     name = models.CharField(
-        'Название категории', max_length=256, unique=True)
-    slug = models.SlugField('Слаг', max_length=50)
+        verbose_name='Название',
+        max_length=256
+    )
+    slug = models.SlugField(
+        verbose_name='Идентификатор',
+        max_length=50,
+        unique=True
+    )
+
+    class Meta:
+        verbose_name = 'Категория'
 
     def __str__(self):
         return self.name
@@ -14,8 +23,17 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(
-        'Жанр произведения', max_length=256, unique=True)
-    slug = models.SlugField('Слаг', max_length=50)
+        verbose_name='Название',
+        max_length=256,
+    )
+    slug = models.SlugField(
+        verbose_name='Идентификатор',
+        max_length=50,
+        unique=True
+    )
+
+    class Meta:
+        verbose_name = 'Жанр'
 
     def __str__(self):
         return self.name
@@ -23,13 +41,31 @@ class Genre(models.Model):
 
 class Title(models.Model):
     name = models.CharField(
-        'Название произведения', max_length=256)
-    year = models.PositiveIntegerField('Год выпуска произведения')
-    description = models.TextField('Описание произведения')
+        verbose_name='Название',
+        max_length=256
+    )
+    year = models.IntegerField(
+        verbose_name='Дата выхода'
+    )
+    description = models.TextField(
+        verbose_name='Описание',
+        null=True,
+        blank=True
+    )
+    genre = models.ManyToManyField(
+        Genre,
+        verbose_name='Жанр'
+    )
     category = models.ForeignKey(
-        Category, on_delete=models.SET_NULL,
-        related_name='titles', null=True)
-    genre = models.ManyToManyField(Genre, related_name='titles')
+        Category,
+        verbose_name='Категория',
+        on_delete=models.SET_NULL,
+        related_name='titles',
+        null=True
+    )
+
+    class Meta:
+        verbose_name = 'Произведение'
 
     def __str__(self):
         return self.name

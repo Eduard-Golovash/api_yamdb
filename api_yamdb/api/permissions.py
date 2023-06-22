@@ -1,19 +1,4 @@
 from rest_framework.permissions import SAFE_METHODS, BasePermission
-import api_yamdb.settings as settings
-
-
-class IsAuthor(BasePermission):
-    def has_object_permission(self, request, view, obj):
-        if request.user.is_authenticated:
-            if (
-                request.user.role == settings.ADMIN
-                or request.user.role == settings.MODERATOR
-            ):
-                return True
-        return (
-            request.method in SAFE_METHODS
-            or obj.author == request.user
-        )
 
 
 class IsAdminOrModeratorOrOwnerOrReadOnly(BasePermission):
@@ -34,7 +19,7 @@ class AdminOrReadOnly(BasePermission):
         user = request.user
         if request.user.is_authenticated:
             return (
-                user.is_admin()
+                user.is_admin() or user.is_superuser
             )
         return request.method in SAFE_METHODS
 
