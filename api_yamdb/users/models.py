@@ -18,7 +18,7 @@ class User(AbstractUser):
         choices=settings.ROLE_CHOICES,
         default=settings.USER,
     )
-    confirmation_code = models.TextField('Код подтверждения')
+    confirmation_code = models.CharField('Код подтверждения')
 
     def is_admin(self):
         return (self.role == settings.ADMIN or self.is_superuser

@@ -49,13 +49,13 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UsersSerializer(serializers.ModelSerializer):
-    def validate_username(self, value):
-        RegisterUserSerializer().validate_username(value)
-        return value
+    # def validate_username(self, value):
+    #     RegisterUserSerializer().validate_username(value)
+    #     return value
 
-    def validate_email(self, value):
-        RegisterUserSerializer().validate_email(value)
-        return value
+    # def validate_email(self, value):
+    #     RegisterUserSerializer().validate_email(value)
+    #     return value
 
     class Meta:
         model = User
