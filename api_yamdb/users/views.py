@@ -1,6 +1,5 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
 from django.shortcuts import get_object_or_404
-from rest_framework.authtoken.models import Token
 from rest_framework_simplejwt.tokens import AccessToken
 from rest_framework import permissions
 from rest_framework import generics, status
@@ -18,21 +17,14 @@ codegen = PasswordResetTokenGenerator()
 class RegisterUserAPIView(generics.CreateAPIView):
     queryset = User.objects.all()
     permission_classes = (permissions.AllowAny,)
-    serializer_class = RegisterUserSerializer  
+    serializer_class = RegisterUserSerializer
 
     def post(self, request, *args, **kwargs):
         data = request.data
         serializer = RegisterUserSerializer(data=data)
-        confirmation_code = Token.generate_key()
-        user = User.objects.filter(**data).first()
-        if user:
-            user.confirmation_code = user.confirmation_code
-            user.save()
-        else:
-            serializer.is_valid(raise_exception=True)
-            User.objects.create(**serializer.validated_data,
-                                confirmation_code=confirmation_code)
-        send_confirmation_code(confirmation_code,
+        serializer.is_valid(raise_exception=True)
+        user, _ = User.objects.get_or_create(**serializer.validated_data)
+        send_confirmation_code(user.confirmation_code,
                                email=serializer.validated_data['email'])
         return Response(serializer.data, status=status.HTTP_200_OK)
 

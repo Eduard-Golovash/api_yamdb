@@ -4,36 +4,38 @@ from rest_framework.exceptions import ValidationError
 from rest_framework.validators import UniqueValidator
 
 from reviews.models import User
+from .validators import validate_username
 
 
 class RegisterUserSerializer(serializers.Serializer):
     email = serializers.EmailField(
-        max_length=150,
-        required=True,
-        validators=[UniqueValidator(queryset=User.objects.all())],
+        max_length=254
     )
     username = serializers.CharField(
         max_length=150,
-        required=True,
+        validators=(validate_username,)
     )
 
-    def validate_username(self, value):
-        if value == 'me':
+    def validate(self, data):
+        username = data.get('username')
+        email = data.get('email')
+        if username == 'me':
             raise ValidationError('Использование "me" в качестве '
                                   'username запрещено')
-        reg = re.compile(r'^[\w.@+-]+\Z')
-        if re.match(reg, value) is None:
-            raise ValidationError('Только буквы, цифры и @/./+/-/_.')
-        if User.objects.filter(username=value).first():
-            raise ValidationError('Username уже занят')
-        return value
-
-    def validate_email(self, value):
-        if User.objects.filter(email=value).first():
-            raise ValidationError('Email уже занят')
-        return value
+        if not User.objects.filter(username=username,
+                                   email=email).exists():   
+            if User.objects.filter(username=data.get('username')):
+                raise serializers.ValidationError(
+                    'Пользователь с таким username уже существует'
+                )
+            if User.objects.filter(email=data.get('email')):
+                raise serializers.ValidationError(
+                    'Пользователь с таким email уже существует'
+                )
+        return data
 
     class Meta:
+        model = User
         fields = ['email', 'username']
 
 
@@ -49,14 +51,6 @@ class TokenSerializer(serializers.Serializer):
 
 
 class UsersSerializer(serializers.ModelSerializer):
-    def validate_username(self, value):
-        RegisterUserSerializer().validate_username(value)
-        return value
-
-    def validate_email(self, value):
-        RegisterUserSerializer().validate_email(value)
-        return value
-
     class Meta:
         model = User
         fields = [

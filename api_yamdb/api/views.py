@@ -36,12 +36,6 @@ class UserViewSet(viewsets.ModelViewSet):
     lookup_field = "username"
     pagination_class = PageNumberPagination
 
-    def perform_create(self, serializer):
-        if self.request.user.role == "admin":
-            if not self.request.POST.get("email"):
-                raise ValidationError("entry is already exist.")
-        serializer.save()
-
     def get_permissions(self):
         if self.action in ["list", "retrieve", "create"]:
             return (IsAdmin(),)

@@ -2,12 +2,13 @@ import api_yamdb.settings as settings
 from django.contrib.auth.models import AbstractUser
 from django.db.models.constraints import UniqueConstraint
 from django.db import models
+from .validators import validate_username
 
 
 class User(AbstractUser):
     username = models.CharField(
         'Имя пользователя', max_length=150, unique=True,
-        null=False, blank=False)
+        null=False, blank=False, validators=(validate_username,))
     email = models.EmailField(
         'Электронная почта', max_length=254, unique=True,
         null=False, blank=False)
@@ -33,7 +34,4 @@ class User(AbstractUser):
         return self.username
 
     class Meta:
-        constraints = [UniqueConstraint(
-            fields=['username', 'email'],
-            name='unique_registry')]
         ordering = ['username']
