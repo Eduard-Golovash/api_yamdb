@@ -11,7 +11,9 @@ class IsAdminOrModeratorOrOwnerOrReadOnly(BasePermission):
         user = request.user
         return (
             request.method in SAFE_METHODS
-        ) or user.is_moderator() or user.is_admin() or obj.author == request.user
+        ) or (user.is_moderator()
+              ) or (user.is_admin()
+                    ) or obj.author == request.user
 
 
 class AdminOrReadOnly(BasePermission):

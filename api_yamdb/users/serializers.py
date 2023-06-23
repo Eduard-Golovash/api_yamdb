@@ -1,7 +1,5 @@
 from rest_framework import serializers
-import re
 from rest_framework.exceptions import ValidationError
-from rest_framework.validators import UniqueValidator
 
 from reviews.models import User
 from .validators import validate_username
@@ -23,7 +21,7 @@ class RegisterUserSerializer(serializers.Serializer):
             raise ValidationError('Использование "me" в качестве '
                                   'username запрещено')
         if not User.objects.filter(username=username,
-                                   email=email).exists():   
+                                   email=email).exists():
             if User.objects.filter(username=data.get('username')):
                 raise serializers.ValidationError(
                     'Пользователь с таким username уже существует'
@@ -64,4 +62,3 @@ class UsersMeSerializer(UsersSerializer):
         model = User
         fields = UsersSerializer.Meta.fields
         read_only_fields = ['role']
-

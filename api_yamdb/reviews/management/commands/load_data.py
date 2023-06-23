@@ -29,7 +29,8 @@ class Command(BaseCommand):
 
     def load_users(self, path):
         try:
-            with open(os.path.join(path, 'users.csv'), encoding='utf-8') as file:
+            with open(os.path.join(path, 'users.csv'),
+                      encoding='utf-8') as file:
                 reader = csv.DictReader(file)
                 for row in reader:
                     User.objects.create(
@@ -41,7 +42,7 @@ class Command(BaseCommand):
                         role=row['role'],
                     )
         except FileNotFoundError:
-            self.stdout.write(self.style.WARNING(f"Файл не найден"))
+            self.stdout.write(self.style.WARNING("Файл не найден"))
         except csv.Error as e:
             self.stdout.write(self.style.ERROR(
                 f"Ошибка при чтении файла: {str(e)}"))
@@ -56,7 +57,7 @@ class Command(BaseCommand):
                         slug=row['slug'],
                     )
         except FileNotFoundError:
-            self.stdout.write(self.style.WARNING(f"Файл не найден"))
+            self.stdout.write(self.style.WARNING("Файл не найден"))
         except csv.Error as e:
             self.stdout.write(self.style.ERROR(
                 f"Ошибка при чтении файла: {str(e)}"))
@@ -71,7 +72,7 @@ class Command(BaseCommand):
                         slug=row['slug'],
                     )
         except FileNotFoundError:
-            self.stdout.write(self.style.WARNING(f"Файл не найден"))
+            self.stdout.write(self.style.WARNING("Файл не найден"))
         except csv.Error as e:
             self.stdout.write(self.style.ERROR(
                 f"Ошибка при чтении файла: {str(e)}"))
@@ -90,7 +91,7 @@ class Command(BaseCommand):
                         category=category
                     ).genre.set(row['genre_ids'].split(','))
         except FileNotFoundError:
-            self.stdout.write(self.style.WARNING(f"Файл не найден"))
+            self.stdout.write(self.style.WARNING("Файл не найден"))
         except csv.Error as e:
             self.stdout.write(self.style.ERROR(
                 f"Ошибка при чтении файла: {str(e)}"))
@@ -108,7 +109,7 @@ class Command(BaseCommand):
                         pub_date=row['pub_date']
                     )
         except FileNotFoundError:
-            self.stdout.write(self.style.WARNING(f"Файл не найден"))
+            self.stdout.write(self.style.WARNING("Файл не найден"))
         except csv.Error as e:
             self.stdout.write(self.style.ERROR(
                 f"Ошибка при чтении файла: {str(e)}"))
@@ -125,7 +126,7 @@ class Command(BaseCommand):
                         pub_date=row['pub_date']
                     )
         except FileNotFoundError:
-            self.stdout.write(self.style.WARNING(f"Файл не найден"))
+            self.stdout.write(self.style.WARNING("Файл не найден"))
         except csv.Error as e:
             self.stdout.write(self.style.ERROR(
                 f"Ошибка при чтении файла: {str(e)}"))
