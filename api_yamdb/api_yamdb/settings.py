@@ -1,5 +1,7 @@
 from pathlib import Path
+from datetime import timedelta
 
+import os
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -11,7 +13,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = ['*']
 
-
+AUTH_USER_MODEL = 'users.User'
 # Application definition
 
 INSTALLED_APPS = [
@@ -21,6 +23,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'reviews.apps.ReviewsConfig',
+    'users',
+    'api',
+    'rest_framework',
+    'rest_framework.authtoken',
 ]
 
 MIDDLEWARE = [
@@ -101,3 +108,37 @@ USE_TZ = True
 STATIC_URL = '/static/'
 
 STATICFILES_DIRS = ((BASE_DIR / 'static/'),)
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        "rest_framework_simplejwt.authentication.JWTAuthentication",
+    ],
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.'
+                                'PageNumberPagination',
+    'PAGE_SIZE': 10,
+}
+
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=2),
+    'AUTH_HEADER_TYPES': ('Bearer',),
+}
+
+ROLE_CHOICES = [
+    ('user', 'user'),
+    ('moderator', 'moderator'),
+    ('admin', 'admin'),
+]
+
+USER = 'user'
+MODERATOR = 'moderator'
+ADMIN = 'admin'
+
+LOGIN_URL = 'users:login'
+
+EMAIL_BACKEND = 'django.core.mail.backends.filebased.EmailBackend'
+
+EMAIL_FILE_PATH = os.path.join(BASE_DIR, 'sent_emails')
