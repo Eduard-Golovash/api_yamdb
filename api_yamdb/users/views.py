@@ -42,7 +42,7 @@ class GetTokenAPIView(generics.CreateAPIView):
         if confirmation_code == user.confirmation_code:
             token = str(AccessToken.for_user(user))
             return Response({'token': f'{token}'}, status=status.HTTP_200_OK)
-        
+
         return Response(
             {'confirmation_code': ['Код не действителен']},
             status=status.HTTP_400_BAD_REQUEST
