@@ -1,7 +1,6 @@
 from django_filters.rest_framework import DjangoFilterBackend
 from django.db.models import Avg
 from django.shortcuts import get_object_or_404
-from rest_framework.exceptions import ParseError
 from rest_framework import filters, viewsets, status
 from rest_framework.response import Response
 from rest_framework.decorators import action
@@ -20,7 +19,7 @@ from .serializers import (
     TitleSerializer,
     ReadTitleSerializer
 )
-from .mixins import ListCreateDestroyViewSet
+from .mixins import ListCreateDestroyViewSet, SearchFilterMixin
 from .filters import TitleFilter
 from users.serializers import UsersSerializer, UsersMeSerializer
 
@@ -47,17 +46,16 @@ class UserViewSet(viewsets.ModelViewSet):
         permission_classes=[IsAuthenticated],
     )
     def get_patch_me(self, request):
-        user = get_object_or_404(User, username=self.request.user)
+        user = request.user
         if request.method == "GET":
             serializer = UsersMeSerializer(user)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        if request.method == "PATCH":
-            serializer = UsersMeSerializer(
-                user, data=request.data, partial=True
-            )
-            serializer.is_valid(raise_exception=True)
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+        serializer = UsersMeSerializer(
+            user, data=request.data, partial=True
+        )
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -70,15 +68,6 @@ class ReviewViewSet(viewsets.ModelViewSet):
         title_id = self.kwargs.get("title_id")
         queryset = Review.objects.filter(title=title_id)
         return queryset
-
-    def perform_create(self, serializer):
-        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
-        if Review.objects.filter(
-            title=title,
-            author=self.request.user
-        ).exists():
-            raise ParseError
-        serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -103,22 +92,14 @@ class CommentViewSet(viewsets.ModelViewSet):
         serializer.save(author=self.request.user, review=review)
 
 
-class CategoryViewSet(ListCreateDestroyViewSet):
+class CategoryViewSet(SearchFilterMixin, ListCreateDestroyViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    permission_classes = (AdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ("name",)
-    lookup_field = "slug"
 
 
-class GenreViewSet(ListCreateDestroyViewSet):
+class GenreViewSet(SearchFilterMixin, ListCreateDestroyViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    permission_classes = (AdminOrReadOnly,)
-    filter_backends = (filters.SearchFilter,)
-    search_fields = ("name",)
-    lookup_field = "slug"
 
 
 class TitleViewSet(viewsets.ModelViewSet):

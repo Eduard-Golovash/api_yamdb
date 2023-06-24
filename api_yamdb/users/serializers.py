@@ -17,16 +17,16 @@ class RegisterUserSerializer(serializers.Serializer):
     def validate(self, data):
         username = data.get('username')
         email = data.get('email')
-        if username == 'me':
+        if username.lower() == 'me':
             raise ValidationError('Использование "me" в качестве '
                                   'username запрещено')
         if not User.objects.filter(username=username,
                                    email=email).exists():
-            if User.objects.filter(username=data.get('username')):
+            if User.objects.filter(username=data.get('username')).exists():
                 raise serializers.ValidationError(
                     'Пользователь с таким username уже существует'
                 )
-            if User.objects.filter(email=data.get('email')):
+            if User.objects.filter(email=data.get('email')).exists():
                 raise serializers.ValidationError(
                     'Пользователь с таким email уже существует'
                 )

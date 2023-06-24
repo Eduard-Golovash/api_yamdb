@@ -1,5 +1,7 @@
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
+
+from reviews.validators import validate_year
 from users.models import User
 
 
@@ -45,7 +47,8 @@ class Title(models.Model):
         max_length=256
     )
     year = models.IntegerField(
-        verbose_name='Дата выхода'
+        verbose_name='Дата выхода',
+        validators=[validate_year]
     )
     description = models.TextField(
         verbose_name='Описание',
@@ -89,11 +92,15 @@ class Review(models.Model):
     score = models.IntegerField(
         null=True,
         default=None,
-        validators=[MinValueValidator(1), MaxValueValidator(10)]
+        validators=[
+            MinValueValidator(1),
+            MaxValueValidator(10, message='Оценка должна быть от 1 до 10')
+        ]
     )
     pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
 
     class Meta:
+        ordering = ['-pub_date']
         constraints = (
             models.UniqueConstraint(
                 fields=['author', 'title'],
