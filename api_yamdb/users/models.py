@@ -1,6 +1,7 @@
-import api_yamdb.settings as settings
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+
+import api_yamdb.settings as settings
 from .validators import validate_username
 
 
