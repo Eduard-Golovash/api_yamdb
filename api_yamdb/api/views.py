@@ -69,6 +69,12 @@ class ReviewViewSet(viewsets.ModelViewSet):
         queryset = Review.objects.filter(title=title_id)
         return queryset
 
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, pk=self.kwargs.get('title_id'))
+        serializer.save(
+            author=self.request.user,
+            title=title)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     queryset = Comment.objects.all()
